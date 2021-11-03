@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h1 List of users
+  table
+    tr 
+      th #
+      th ID 
+      th Username 
+      th Password
+    each user, index in users 
+      tr 
+        td= index 
+        td= user["id"]
+        td= user["username"]
+        td= user["password"]
