@@ -21,7 +21,7 @@ function onSubmit(event) {
         .then((response) => response.json())
         .then((data) => {
             if(data.message === "ok") {
-                window.location.href="/login";
+                window.location.href="/login.html";
             } else {
                 if (data.message) {
                     document.getElementById("error").innerHTML = data.message;
