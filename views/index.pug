@@ -1,15 +1,18 @@
 extends layout
 
 block content
+  div(id="link-register")
+  div(id="link-login")
+  
   h1= title
   h3(id="secrets")
   p Welcome to #{title}
-  
+
   form(action="" id="todo-form" method="POST")
     label(for="text-input") Add todos
-    input(type="text" id="todo-input" name="text-input")
-  
+    input(type="text" id="add-item" name="text-input")
+
   h4 Todos:
   ul(id="todo-content")
-  
+
   script(src="/javascripts/index.js") 

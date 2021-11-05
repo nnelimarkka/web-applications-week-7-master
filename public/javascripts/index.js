@@ -10,7 +10,24 @@ if (document.readyState !== "loading") {
   
 function initializeCodeIndex() {
     let token = localStorage.getItem("auth_token");
-    if (!token) return;
+    if (!token) {
+        let linkLogin = document.getElementById("link-login");
+        let linkRegister = document.getElementById("link-register");
+
+        let loginLink = document.createElement("a");
+        loginLink.href = "/login.html";
+        loginLink.innerHTML = 'Login';
+
+        linkLogin.appendChild(loginLink);
+
+        let registerLink = document.createElement("a");
+        registerLink.href = "/register.html";
+        registerLink.innerHTML = 'Register';
+
+        linkRegister.appendChild(registerLink);
+
+        return;
+    }
     let button = document.createElement("button");
     
     fetch("/api/user/email", {
@@ -62,7 +79,7 @@ function initializeCodeIndex() {
     document.getElementById("todo-form").addEventListener("submit", (event) => {
         event.preventDefault();
 
-        let todo = document.getElementById("todo-input").value;
+        let todo = document.getElementById("add-item").value;
 
         console.log(todo);
 
