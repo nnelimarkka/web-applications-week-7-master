@@ -10,7 +10,15 @@ router.get("/register", (req,res) => {
   res.render('register');
 });
 
+router.get('/register.html', (req, res, next) => {
+  res.render('register');
+});
+
 router.get("/login", (req,res) => {
+  res.render('login');
+});
+
+router.get('/login.html', (req, res, next) => {
   res.render('login');
 });
 
