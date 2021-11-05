@@ -14,6 +14,10 @@ let jwtStrategy = require("passport-jwt").Strategy,
 extractJwt = require('passport-jwt').ExtractJwt;
 const { parse } = require('dotenv');
 const { application } = require('express');
+const multer = require("multer")
+const storage = multer.memoryStorage();
+const upload = multer({storage})
+
 
 let opts = {}
 opts.jwtFromRequest = extractJwt.fromAuthHeaderAsBearerToken();
@@ -35,16 +39,14 @@ passport.use(new jwtStrategy(opts, (jwt_payload, done) => {
 router.use(passport.initialize());
 
 
-/* GET users listing. */
-router.get('/list', validateToken, (req, res, next) => {
-  User.find({}, (err, users) =>{
-    if(err) return next(err);
-    res.render("users", {users});
-  });
+/* GET users email. */
+router.get('/user/email', validateToken, (req, res, next) => {
+  res.send(req.user.email);
 });
 
 router.post("/todos", passport.authenticate('jwt', {session: false}), (req, res) => {
   Todo.findOne({ user: req.user.id }, (err, todo) => {
+    console.log(req.body.items);
     if (err)
       throw err;
     if (!todo) {
@@ -87,14 +89,13 @@ router.get('/login', (req, res, next) => {
 });
 
 router.post('/user/login', 
-  body("email").isEmail().normalizeEmail(),
-  body("password").isLength({min: 8}),
+  upload.none(),
   (req, res, next) => {
     User.findOne({ email: req.body.email }, (err, user) => {
       if (err)
         throw err;
       if (!user) {
-        return res.status(403).json({ message: "Login faile :(" });
+        return res.status(403).json({ message: "Invalid credentials" });
       } else {
         bcrypt.compare(req.body.password, user.password, (err, isMatch) => {
           if (err)
@@ -114,6 +115,8 @@ router.post('/user/login',
                 res.json({ success: true, token });
               }
             );
+          } else {
+              return res.status(403).json({ message: "Invalid credentials" }); 
           }
         });
       }
@@ -137,16 +140,17 @@ router.get("/user/users/:email", (req, res) => {
 });
 
 router.post('/user/register', 
+  upload.none(),
   body("email").isEmail().normalizeEmail(),
   body("password").isLength({min: 8}), //.isStrongPassword toimii myös
   (req, res, next) => {
+    console.log(req.body);
     const errors = validationResult(req);
     if(!errors.isEmpty() || !(/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*[~`!@#\$%\^&\*\(\)\-_\+=\{\}\[\]\|\\;:"<>,\.\/\?]/.test(req.body.password))) {
       if (errors.isEmpty()) {
-        let errorMessage = {"msg": "password didn't meet requirements."};
-        return res.status(400).json(errorMessage);
+        return res.status(400).json({message: "Password is not strong enough"});
       }
-      return res.status(400).json({errors: errors.array()});
+      return res.status(400).json({message: "Password is not strong enough"});
     }
     User.findOne({email: req.body.email}, (err, user) => {
       if(err) {
@@ -154,7 +158,7 @@ router.post('/user/register',
         throw err
       };
       if(user){
-        return res.status(403).json({email: "Email already in use."});
+        return res.status(403).json({message: "Email already in use"});
       } else {
         bcrypt.genSalt(10, (err, salt) => {
           bcrypt.hash(req.body.password, salt, (err, hash) => {
@@ -166,7 +170,7 @@ router.post('/user/register',
               },
               (err, ok) => {
                 if(err) throw err;
-                return res.send("ok");
+                return res.json({message: "ok"});
               }
             );
           });
